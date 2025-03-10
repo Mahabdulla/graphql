@@ -48,10 +48,35 @@ document.addEventListener("DOMContentLoaded", function () {
             errorMessage.textContent = "Network error. Please try again.";
         }
     });
-});
 
-    
-    
+    // Ensure correct JWT usage for GraphQL requests
+    const token = localStorage.getItem("jwtToken");
+
+    if (!token) {
+        console.error("❌ No JWT found! Redirecting to login...");
+        window.location.href = "index.html"; // Force re-login if token is missing
+    }
+
+    console.log("🔍 Sending JWT:", `"Bearer ${token.trim()}"`);
+
+    fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token.trim()}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            query: "query { user { id, login, email } }"
+        })
+    })
+    .then(response => response.json())
+    .then(json => {
+        console.log("🔍 GraphQL Response:", json);
+        if (json.errors) {
+            json.errors.forEach(error => console.error("❌ GraphQL Error:", error.message));
+        }
+    })
+    .catch(error => console.error("Error fetching GraphQL data:", error));
 
     // Handle logout
     if (logoutBtn) {
@@ -60,4 +85,4 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = "index.html"; // Redirect to login page
         });
     }
-
+});
