@@ -8,23 +8,22 @@ document.addEventListener("DOMContentLoaded", function () {
         if (logoutBtn) logoutBtn.style.display = "none";
     }
 
-    // Redirect if already logged in
+    // Check if user is already logged in
     if (localStorage.getItem("jwtToken")) {
+        console.log("User already logged in. Redirecting to main page...");
         window.location.href = "main.html";
     }
 
     // Handle login form submission
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
-    
-        const loginValue = document.getElementById("email").value.trim(); // Username or Email
+        
+        const loginValue = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
-    
-        if (!email.trim() || !password.trim()) {
-            errorMessage.textContent = "Please enter both email and password.";
-            return;
-        }
+
         try {
+            console.log("Attempting login...");
+            
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
                 headers: {
@@ -32,24 +31,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Content-Type": "application/json",
                 },
             });
-    
-            const token = await response.text(); // Get JWT as a string
-    
+
+            const token = await response.text(); // Read response as text
             console.log("API Response (JWT Token):", token);
-    
-            // 🔹 Fix: Ensure the response is treated as successful when a token is received
-            if (response.ok && token && token.length > 50) { // Tokens are usually long strings
-                localStorage.setItem("jwtToken", token); // Store JWT
-                window.location.href = "main.html"; // Redirect after successful login
+            
+            if (response.ok && token && token.length > 50) {
+                localStorage.setItem("jwtToken", token);
+                console.log("JWT successfully stored in localStorage");
+                window.location.href = "main.html"; // Redirect after login
             } else {
-                errorMessage.textContent = "Invalid credentials. Please try again.";
                 console.error("Login failed: No valid token received");
+                errorMessage.textContent = "Invalid credentials. Please try again.";
             }
         } catch (error) {
+            console.error("Error during login request:", error);
             errorMessage.textContent = "Network error. Please try again.";
-            console.error("Error:", error);
         }
     });
+});
+
     
     
 
@@ -60,4 +60,4 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = "index.html"; // Redirect to login page
         });
     }
-});
+
