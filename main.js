@@ -5,10 +5,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     const gradeAvgEl = document.getElementById("gradeAverage");
 
     const token = localStorage.getItem("jwtToken");
-    if (!token) {
-        window.location.href = "index.html"; // Redirect if not logged in
-        return;
-    }
+
+if (!token) {
+    console.error("❌ No JWT found! Redirecting to login...");
+    window.location.href = "index.html"; // Force re-login if token is missing
+} else {
+    console.log("🔍 Using JWT:", `"Bearer ${token.trim()}"`);
+}
+
 
     // Example userId & eventId (You may need to fetch these dynamically)
     const userId = 1; // Change to dynamic user ID
@@ -75,14 +79,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         const response = await fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + token,
+                "Authorization": `Bearer ${token.trim()}`, // Ensure no extra spaces
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 query,
-                variables: { userId, eventId } // Pass variables dynamically
+                variables: { userId, eventId }
             }),
         });
+        
 
         const data = await response.json();
         console.log("GraphQL Response:", data); // Debugging
