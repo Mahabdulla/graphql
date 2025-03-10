@@ -16,16 +16,15 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handle login form submission
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
-
+    
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-
-        // Prevent empty form submission
+    
         if (!email.trim() || !password.trim()) {
             errorMessage.textContent = "Please enter both email and password.";
             return;
         }
-
+        
         try {
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
@@ -34,19 +33,23 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Content-Type": "application/json",
                 },
             });
-
+    
             const data = await response.json();
-
+            console.log("API Response:", data); // Debugging
+    
             if (response.ok && data.jwt) {
                 localStorage.setItem("jwtToken", data.jwt);
                 window.location.href = "main.html"; // Redirect after login
             } else {
-                errorMessage.textContent = "Invalid credentials or missing JWT. Please try again.";
+                errorMessage.textContent = "Invalid credentials. Please try again.";
+                console.error("Login failed:", data);
             }
         } catch (error) {
-            errorMessage.textContent = "Network error. Please check your connection and try again.";
+            errorMessage.textContent = "Network error. Please try again.";
+            console.error("Error:", error);
         }
     });
+    
 
     // Handle logout
     if (logoutBtn) {
