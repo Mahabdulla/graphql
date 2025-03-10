@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         const loginValue = document.getElementById("email").value.trim(); // Username or Email
         const password = document.getElementById("password").value.trim();
-        
+    
         if (!email.trim() || !password.trim()) {
             errorMessage.textContent = "Please enter both email and password.";
             return;
@@ -33,16 +33,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
             });
     
-            const token = await response.text(); // The API directly returns the token as text
+            const token = await response.text(); // Get JWT as a string
     
             console.log("API Response (JWT Token):", token);
     
-            if (response.ok && token) {
-                localStorage.setItem("jwtToken", token); // Store JWT correctly
-                window.location.href = "main.html"; // Redirect to profile page
+            // 🔹 Fix: Ensure the response is treated as successful when a token is received
+            if (response.ok && token && token.length > 50) { // Tokens are usually long strings
+                localStorage.setItem("jwtToken", token); // Store JWT
+                window.location.href = "main.html"; // Redirect after successful login
             } else {
                 errorMessage.textContent = "Invalid credentials. Please try again.";
-                console.error("Login failed:", token);
+                console.error("Login failed: No valid token received");
             }
         } catch (error) {
             errorMessage.textContent = "Network error. Please try again.";
