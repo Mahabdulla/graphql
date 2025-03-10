@@ -17,38 +17,39 @@ document.addEventListener("DOMContentLoaded", function () {
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
     
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-    
+        const loginValue = document.getElementById("email").value.trim(); // Username or Email
+        const password = document.getElementById("password").value.trim();
+        
         if (!email.trim() || !password.trim()) {
             errorMessage.textContent = "Please enter both email and password.";
             return;
         }
-        
         try {
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
                 headers: {
-                    "Authorization": "Basic " + btoa(email + ":" + password),
+                    "Authorization": "Basic " + btoa(loginValue + ":" + password),
                     "Content-Type": "application/json",
                 },
             });
     
-            const data = await response.json();
-            console.log("API Response:", data); // Debugging
+            const token = await response.text(); // The API directly returns the token as text
     
-            if (response.ok && data.jwt) {
-                localStorage.setItem("jwtToken", data.jwt);
-                window.location.href = "main.html"; // Redirect after login
+            console.log("API Response (JWT Token):", token);
+    
+            if (response.ok && token) {
+                localStorage.setItem("jwtToken", token); // Store JWT correctly
+                window.location.href = "main.html"; // Redirect to profile page
             } else {
                 errorMessage.textContent = "Invalid credentials. Please try again.";
-                console.error("Login failed:", data);
+                console.error("Login failed:", token);
             }
         } catch (error) {
             errorMessage.textContent = "Network error. Please try again.";
             console.error("Error:", error);
         }
     });
+    
     
 
     // Handle logout
