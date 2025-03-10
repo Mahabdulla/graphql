@@ -20,7 +20,10 @@ document.addEventListener("DOMContentLoaded", function () {
         
         const loginValue = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
-
+        if (!email.trim() || !password.trim()) {
+            errorMessage.textContent = "Please enter both email and password.";
+            return;
+        }
         try {
             console.log("Attempting login...");
             
