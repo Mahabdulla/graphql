@@ -67,13 +67,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to extract userId from JWT
     function getUserIdFromToken(token) {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.sub || payload.userId; // Adjust based on API response
+            const payload = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
+            console.log("🔍 Decoded JWT Payload:", payload); // Debugging
+    
+            // Extract userId from the correct field
+            return payload["https://hasura.io/jwt/claims"]["x-hasura-user-id"] || null;
         } catch (error) {
-            console.error("Error decoding JWT:", error);
+            console.error("❌ Error decoding JWT:", error);
             return null;
         }
     }
+    
 
     // Function to fetch user profile data
     async function fetchUserProfile(token, userId) {
