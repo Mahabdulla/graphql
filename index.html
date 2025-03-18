@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-logo">My Profile</div>
+        <button id="logoutBtn" class="logout-btn" style="display: none;">Logout</button>
+    </nav>
+
+    <!-- Login Form (Initially Visible) -->
+    <div id="loginContainer" class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="email">Email or Username:</label>
+            <input type="text" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+        <p id="errorMessage" class="error-message"></p>
+    </div>
+
+    <!-- Profile Section (Initially Hidden) -->
+    <div id="profileContainer" class="profile-container" style="display: none;">
+        <h2>Welcome, <span id="username"></span>!</h2>
+        <p>XP: <span id="xp"></span></p>
+        <p>Audit Ratio: <span id="auditRatio"></span></p>
+        <p>Grade Average: <span id="gradeAverage"></span></p>
+
+        <!-- Graphs Section -->
+        <div class="graphs-container">
+            <h3>Statistics</h3>
+            <svg id="xpGraph"></svg>
+            <svg id="passFailGraph"></svg>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
