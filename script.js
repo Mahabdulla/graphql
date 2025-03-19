@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const profileContainer = document.getElementById("profileContainer");
 
     // Check if user is already logged in
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem("jwtToken").trim();
     if (token) {
         showProfile(); // If logged in, show profile
     }
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         profileContainer.style.display = "block"; // Show profile
         logoutBtn.style.display = "block"; // Show logout button
         
-        const token = localStorage.getItem("jwtToken");
+        const token = localStorage.getItem("jwtToken").trim();
         if (!token) {
             console.error("No JWT found! Redirecting to login...");
             return;
@@ -87,6 +87,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to fetch user profile data
     async function fetchUserProfile(token, userId) {
+        if (!token || token.split('.').length !== 3) {
+            console.error("Invalid JWT format, redirecting to login");
+            localStorage.removeItem("jwtToken");
+            loginContainer.style.display = "block";
+            profileContainer.style.display = "none";
+            return;
+        }
         const eventId = 1; // Set default eventId (modify if dynamic)
 
         const query = `
@@ -146,6 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
         try {
+            console.log("Using token in Authorization header:", `Bearer ${token}`);
             const response = await fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
                 method: "POST",
                 headers: {
