@@ -67,8 +67,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to extract userId from JWT
     function getUserIdFromToken(token) {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.sub || payload.userId; // Adjust based on API response
+            // Properly handle base64url encoding
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(atob(base64));
+            return payload.sub || payload.userId;
         } catch (error) {
             console.error("Error decoding JWT:", error);
             return null;
