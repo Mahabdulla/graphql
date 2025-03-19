@@ -161,10 +161,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await response.json();
             console.log("🔍 GraphQL Response:", data); // Debugging
 
-            if (data.errors) {
-                console.error("❌ GraphQL Error:", data.errors);
-                return;
-            }
+            // if (data.errors) {
+            //     console.error("❌ GraphQL Error:", data.errors);
+            //     return;
+            // }
 
             // Extract User Data
             const user = data.data.user[0];
