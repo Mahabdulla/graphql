@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (token) {
         showProfile(); // If logged in, show profile
     }
+    
 
     // Handle login form submission
     loginForm.addEventListener("submit", async function (event) {
@@ -66,6 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to extract userId from JWT
     function getUserIdFromToken(token) {
+        if (!validateToken(token)) {
+            return null;
+        }
         try {
             // Properly handle base64url encoding
             const base64Url = token.split(".")[1];
@@ -76,6 +80,9 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error decoding JWT:", error);
             return null;
         }
+    }
+    function validateToken(token) {
+        return token && typeof token === 'string' && token.split('.').length === 3;
     }
 
     // Function to fetch user profile data
