@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const profileContainer = document.getElementById("profileContainer");
 
     // Check if user is already logged in
-    const token = localStorage.getItem("jwtToken").trim();
+    const token = localStorage.getItem("jwtToken");
     if (token) {
         showProfile(); // If logged in, show profile
     }
