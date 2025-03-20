@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const token = await response.text();
             
-            if (response.ok && typeof token === "string" && token.startsWith("eyJ")) {
+            if (response.ok && token.includes(".")) {
                 localStorage.setItem("jwtToken", token.trim());
                 showProfile(); // Redirect to profile page
             } else {
@@ -53,120 +53,89 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Fetch user profile data
-        fetchUserProfile(token);
-    }
-
-    // Function to validate JWT format
-    function validateToken(token) {
-        return token && typeof token === 'string' && token.split('.').length === 3 && token.startsWith("eyJ");
-    }
-
-    // Function to fetch user profile data
-    async function fetchUserProfile(token) {
-        if (!validateToken(token)) {
-            console.error("Invalid token format");
-            localStorage.removeItem("jwtToken");
-            loginContainer.style.display = "block";
-            profileContainer.style.display = "none";
+        // Decode JWT to get userId
+        const userId = getUserIdFromToken(token);
+        if (!userId) {
+            console.error("Failed to extract user ID from token.");
             return;
         }
 
-        const eventId = 1; // Set default eventId
+        // Fetch user profile data
+        fetchUserProfile(token, userId);
+    }
 
-        // Use a simpler query first to get the user ID
-        const userQuery = `
-            query {
-                user {
+    // Function to extract userId from JWT
+    function getUserIdFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            return payload.sub || payload.userId; // Adjust based on API response
+        } catch (error) {
+            console.error("Error decoding JWT:", error);
+            return null;
+        }
+    }
+
+    // Function to fetch user profile data
+    async function fetchUserProfile(token, userId) {
+        const eventId = 1; // Set default eventId (modify if dynamic)
+
+        const query = `
+            query($userId: Int!, $eventId: Int!) {
+                user(where: {id: {_eq: $userId}}) {
                     id
+                    login
+                    firstName
+                    lastName
+                    email
+                    auditRatio
+                    totalUp
+                    totalDown
+                    audits: audits_aggregate(
+                        where: {
+                            auditorId: {_eq: $userId},
+                            grade: {_is_null: false}
+                        },
+                        order_by: {createdAt: desc}
+                    ) {
+                        nodes {
+                            id
+                            grade
+                            createdAt
+                            group {
+                                captainLogin
+                                object {
+                                    name
+                                }
+                            }
+                        }
+                    }
+                    progresses(where: { userId: { _eq: $userId }, object: { type: { _eq: "project" } } }, order_by: {updatedAt: desc}) {
+                        id
+                        object {
+                            id
+                            name
+                            type
+                        }
+                        grade
+                        createdAt
+                        updatedAt
+                    }
+                    skills: transactions(
+                        order_by: [{type: desc}, {amount: desc}]
+                        distinct_on: [type]
+                        where: {userId: {_eq: $userId}, type: {_in: ["skill_js", "skill_go", "skill_html", "skill_prog", "skill_front-end", "skill_back-end"]}}
+                    ) {
+                        type
+                        amount
+                    }
+                }
+                event_user(where: { userId: { _eq: $userId }, eventId: {_eq: $eventId}}) {
+                    level
                 }
             }
         `;
 
         try {
-            // First get user ID
-            const userResponse = await fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: userQuery
-                }),
-            });
-
-            const userData = await userResponse.json();
-            
-            if (userData.errors) {
-                console.error("GraphQL Error:", userData.errors);
-                return;
-            }
-
-            if (!userData.data?.user?.length) {
-                console.error("No user data returned");
-                return;
-            }
-
-            const userId = userData.data.user[0].id;
-            
-            // Now fetch the full profile with the userId
-            const fullQuery = `
-                query($userId: Int!, $eventId: Int!) {
-                    user(where: {id: {_eq: $userId}}) {
-                        id
-                        login
-                        firstName
-                        lastName
-                        email
-                        auditRatio
-                        totalUp
-                        totalDown
-                        audits: audits_aggregate(
-                            where: {
-                                auditorId: {_eq: $userId},
-                                grade: {_is_null: false}
-                            },
-                            order_by: {createdAt: desc}
-                        ) {
-                            nodes {
-                                id
-                                grade
-                                createdAt
-                                group {
-                                    captainLogin
-                                    object {
-                                        name
-                                    }
-                                }
-                            }
-                        }
-                        progresses(where: { userId: { _eq: $userId }, object: { type: { _eq: "project" } } }, order_by: {updatedAt: desc}) {
-                            id
-                            object {
-                                id
-                                name
-                                type
-                            }
-                            grade
-                            createdAt
-                            updatedAt
-                        }
-                        skills: transactions(
-                            order_by: [{type: desc}, {amount: desc}]
-                            distinct_on: [type]
-                            where: {userId: {_eq: $userId}, type: {_in: ["skill_js", "skill_go", "skill_html", "skill_prog", "skill_front-end", "skill_back-end"]}}
-                        ) {
-                            type
-                            amount
-                        }
-                    }
-                    event_user(where: { userId: { _eq: $userId }, eventId: {_eq: $eventId}}) {
-                        level
-                    }
-                }
-            `;
-
             const response = await fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
                 method: "POST",
                 headers: {
@@ -174,13 +143,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    query: fullQuery,
+                    query,
                     variables: { userId, eventId },
                 }),
             });
 
             const data = await response.json();
-            console.log("🔍 GraphQL Response:", data);
+            console.log("🔍 GraphQL Response:", data); // Debugging
 
             if (data.errors) {
                 console.error("❌ GraphQL Error:", data.errors);
