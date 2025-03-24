@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
                 headers: {
-                    "Authorization": "Basic " + btoa(loginValue + ":" + password),
+                    "Authorization": `Bearer ${token}` + btoa(loginValue + ":" + password),
                     "Content-Type": "application/json",
                 },
             });
