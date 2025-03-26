@@ -19,12 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const password = document.getElementById("password").value.trim();
     
         try {
-            const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
+            const response = await fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}` + btoa(loginValue + ":" + password),
+                    "Authorization": `Bearer ${token.trim()}`,
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({ query }),
             });
 
             const token = await response.text();
