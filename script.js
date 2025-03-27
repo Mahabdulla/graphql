@@ -14,24 +14,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handle login form submission
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
-        
+    
         const loginValue = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
+        const credentials = btoa(`${loginValue}:${password}`); // base64 encode
     
         try {
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token.trim()}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ query }),
+                    "Authorization": `Basic ${credentials}`
+                }
             });
-
-            const token = await response.text();
-            
-            if (response.ok && token.includes(".")) {
-                localStorage.setItem("jwtToken", token.trim());
+    
+            const jwt = await response.text();
+    
+            if (response.ok && jwt.includes(".")) {
+                localStorage.setItem("jwtToken", jwt.trim());
                 showProfile(); // Redirect to profile page
             } else {
                 errorMessage.textContent = "Invalid credentials. Please try again.";
@@ -41,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
             errorMessage.textContent = "Network error. Please try again.";
         }
     });
+    
 
     // Function to show the profile and fetch user data
     async function showProfile() {
