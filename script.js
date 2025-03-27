@@ -6,19 +6,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const profileContainer = document.getElementById("profileContainer");
 
     // Check if user is already logged in
-    const token = localStorage.getItem("jwtToken");
-    if (token) {
-        showProfile(); // If logged in, show profile
+    const storedToken = localStorage.getItem("jwtToken");
+    if (storedToken) {
+        showProfile();
     }
 
     // Handle login form submission
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
-    
+
         const loginValue = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
         const credentials = btoa(`${loginValue}:${password}`); // base64 encode
-    
+
         try {
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
@@ -26,12 +26,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Authorization": `Basic ${credentials}`
                 }
             });
-    
+
             const jwt = await response.text();
-    
+
             if (response.ok && jwt.includes(".")) {
                 localStorage.setItem("jwtToken", jwt.trim());
-                showProfile(); // Redirect to profile page
+                showProfile();
             } else {
                 errorMessage.textContent = "Invalid credentials. Please try again.";
             }
@@ -40,28 +40,27 @@ document.addEventListener("DOMContentLoaded", function () {
             errorMessage.textContent = "Network error. Please try again.";
         }
     });
-    
 
     // Function to show the profile and fetch user data
     async function showProfile() {
-        loginContainer.style.display = "none"; // Hide login form
-        profileContainer.style.display = "block"; // Show profile
-        logoutBtn.style.display = "block"; // Show logout button
-        
+        loginContainer.style.display = "none";
+        profileContainer.style.display = "block";
+        logoutBtn.style.display = "block";
+
         const token = localStorage.getItem("jwtToken");
         if (!token) {
             console.error("No JWT found! Redirecting to login...");
             return;
         }
 
-        // Decode JWT to get userId
+        console.log("📌 Using JWT:", token); // Debug: see your token
+
         const userId = getUserIdFromToken(token);
         if (!userId) {
             console.error("Failed to extract user ID from token.");
             return;
         }
 
-        // Fetch user profile data
         fetchUserProfile(token, userId);
     }
 
@@ -69,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function getUserIdFromToken(token) {
         try {
             const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.sub || payload.userId; // Adjust based on API response
+            return payload.sub || payload.userId;
         } catch (error) {
             console.error("Error decoding JWT:", error);
             return null;
@@ -78,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to fetch user profile data
     async function fetchUserProfile(token, userId) {
-        const eventId = 1; // Set default eventId (modify if dynamic)
+        const eventId = 1;
 
         const query = `
             query($userId: Int!, $eventId: Int!) {
@@ -150,14 +149,13 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             const data = await response.json();
-            console.log("🔍 GraphQL Response:", data); // Debugging
+            console.log("🔍 GraphQL Response:", data);
 
             if (data.errors) {
                 console.error("❌ GraphQL Error:", data.errors);
                 return;
             }
 
-            // Extract User Data
             const user = data.data.user[0];
             if (!user) {
                 console.error("❌ No user data returned.");
@@ -168,12 +166,10 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("xp").textContent = user.totalUp || 0;
             document.getElementById("auditRatio").textContent = user.auditRatio || "N/A";
 
-            // Calculate grade average
             const grades = user.progresses.map(p => p.grade);
             const avgGrade = grades.length ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(2) : "N/A";
             document.getElementById("gradeAverage").textContent = avgGrade;
 
-            // Generate Graphs
             generateXPGraph(user.progresses);
             generatePassFailGraph(user.progresses);
 
@@ -182,22 +178,22 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Function to handle logout
+    // Handle logout
     logoutBtn.addEventListener("click", function () {
         localStorage.removeItem("jwtToken");
-        loginContainer.style.display = "block"; // Show login form
-        profileContainer.style.display = "none"; // Hide profile
-        logoutBtn.style.display = "none"; // Hide logout button
+        loginContainer.style.display = "block";
+        profileContainer.style.display = "none";
+        logoutBtn.style.display = "none";
     });
 
-    // Placeholder Graph Functions (Update as needed)
+    // Placeholder Graph Functions
     function generateXPGraph(progressData) {
         console.log("Generating XP Graph", progressData);
-        // Implement SVG graph logic here...
+        // Add SVG generation code here...
     }
 
     function generatePassFailGraph(progressData) {
         console.log("Generating Pass/Fail Graph", progressData);
-        // Implement SVG graph logic here...
+        // Add SVG generation code here...
     }
 });
