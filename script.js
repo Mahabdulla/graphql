@@ -23,17 +23,20 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch("https://learn.reboot01.com/api/auth/signin", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Basic ${credentials}`
+                    "Authorization": `Basic ${btoa(`${loginValue}:${password}`)}`
                 }
             });
 
-            const jwt = await response.text();
+            const raw = await response.text();
+const jwt = JSON.parse(raw); // removes the extra quotes
+
 
             if (response.ok && jwt.includes(".")) {
                 localStorage.setItem("jwtToken", jwt.trim());
                 showProfile();
             } else {
-                errorMessage.textContent = "Invalid credentials. Please try again.";
+                console.log("Login failed, got:", jwt);
+                errorMessage.textContent = "Invalid credentials.";
             }
         } catch (error) {
             console.error("Login request error:", error);
