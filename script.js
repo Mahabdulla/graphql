@@ -167,7 +167,32 @@ const jwt = JSON.parse(raw); // removes the extra quotes
 
             document.getElementById("username").textContent = `${user.firstName} ${user.lastName}`;
             document.getElementById("xp").textContent = user.totalUp || 0;
-            document.getElementById("auditRatio").textContent = user.auditRatio || "N/A";
+            // Format total up/down
+const doneMB = (user.totalUp / 1_000_000).toFixed(2);
+const receivedMB = (user.totalDown / 1_000_000).toFixed(2);
+const ratio = user.auditRatio?.toFixed(2) || "0.00";
+
+// Update values
+document.getElementById("auditUp").textContent = `${doneMB} MB`;
+document.getElementById("auditDown").textContent = `${receivedMB} MB`;
+document.getElementById("auditRatio").textContent = ratio;
+
+// Bar visuals (max fill 100%)
+const maxAudit = Math.max(user.totalUp, user.totalDown) || 1;
+const upWidth = (user.totalUp / maxAudit) * 100;
+const downWidth = (user.totalDown / maxAudit) * 100;
+
+document.getElementById("auditUpBar").style.width = `${upWidth}%`;
+document.getElementById("auditDownBar").style.width = `${downWidth}%`;
+
+// Comment
+let comment = "Needs improvement";
+if (ratio >= 1) comment = "Almost perfect!";
+if (ratio >= 1.5) comment = "Great auditor!";
+if (ratio >= 2) comment = "Audit master!";
+
+document.getElementById("auditComment").textContent = comment;
+
 
             const skillLabels = user.skills.map(s => s.type.replace("skill_", "").toUpperCase());
             const skillValues = user.skills.map(s => s.amount);

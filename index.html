@@ -38,7 +38,22 @@
     <div id="profileContainer" class="profile-container" style="display: none;">
         <h2>Welcome, <span id="username"></span>!</h2>
         <p>XP: <span id="xp"></span></p>
-        <p>Audit Ratio: <span id="auditRatio"></span></p>
+        <div class="audit-box">
+            <h3>Audit Ratio</h3>
+            <p>Done: <span id="auditUp">--</span> ↑</p>
+            <div class="bar-container">
+                <div class="bar-fill green" id="auditUpBar"></div>
+            </div>
+        
+            <p>Received: <span id="auditDown">--</span> ↓</p>
+            <div class="bar-container">
+                <div class="bar-fill black" id="auditDownBar"></div>
+            </div>
+        
+            <h2 id="auditRatio" class="audit-score">--</h2>
+            <p id="auditComment" class="audit-comment">Loading...</p>
+        </div>
+        
         <h3>Best Skills</h3>
         <div id="skillChart"></div>
 
