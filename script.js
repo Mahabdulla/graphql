@@ -169,12 +169,9 @@ const jwt = JSON.parse(raw); // removes the extra quotes
             document.getElementById("xp").textContent = user.totalUp || 0;
             document.getElementById("auditRatio").textContent = user.auditRatio || "N/A";
 
-            const grades = user.progresses.map(p => p.grade);
-            const avgGrade = grades.length ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(2) : "N/A";
-            document.getElementById("gradeAverage").textContent = avgGrade;
-
-            generateXPGraph(user.progresses);
-            generatePassFailGraph(user.progresses);
+            const skillLabels = user.skills.map(s => s.type.replace("skill_", "").toUpperCase());
+            const skillValues = user.skills.map(s => s.amount);
+            renderSkillChart(skillLabels, skillValues);
 
         } catch (error) {
             console.error("❌ Error fetching user profile:", error);
@@ -189,14 +186,56 @@ const jwt = JSON.parse(raw); // removes the extra quotes
         logoutBtn.style.display = "none";
     });
 
-    // Placeholder Graph Functions
-    function generateXPGraph(progressData) {
-        console.log("Generating XP Graph", progressData);
-        // Add SVG generation code here...
-    }
+    // Render skill radar chart using ApexCharts
+function renderSkillChart(labels, values) {
+    const options = {
+        chart: {
+            type: 'radar',
+            height: 400,
+            width: "100%",
+            toolbar: { show: false },
+        },
+        series: [{
+            name: 'Skills',
+            data: values
+        }],
+        labels: labels,
+        yaxis: {
+            show: false
+        },
+        plotOptions: {
+            radar: {
+                size: 123,
+                polygons: {
+                    strokeColors: '#ccc',
+                    connectorColors: '#ccc',
+                    fill: {
+                        colors: ['#f8f8f8', '#ffffff']
+                    }
+                }
+            }
+        },
+        colors: ['#AE88FF'],
+        fill: {
+            opacity: 0.4,
+            colors: ['#AE88FF']
+        },
+        markers: {
+            size: 5,
+            colors: ['#AE88FF'],
+            strokeWidth: 2,
+            strokeColors: '#fff'
+        },
+        stroke: {
+            width: 2
+        }
+    };
 
-    function generatePassFailGraph(progressData) {
-        console.log("Generating Pass/Fail Graph", progressData);
-        // Add SVG generation code here...
-    }
+    const chartContainer = document.querySelector("#skillChart");
+    chartContainer.innerHTML = ""; // clear existing
+    const chart = new ApexCharts(chartContainer, options);
+    chart.render();
+}
+
+    
 });
