@@ -166,6 +166,9 @@ const jwt = JSON.parse(raw); // removes the extra quotes
             }
 
             document.getElementById("username").textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById("userlogin").textContent = user.login;
+            document.getElementById("useremail").textContent = user.email;
+
             document.getElementById("xp").textContent = user.totalUp || 0;
             // Format total up/down
 const doneMB = (user.totalUp / 1_000_000).toFixed(2);
