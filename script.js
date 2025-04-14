@@ -182,6 +182,8 @@ document.getElementById("totalAudits").textContent = totalAudits;
 document.getElementById("passAudits").textContent = passAudits;
 document.getElementById("failAudits").textContent = failAudits;
 
+
+
 // Remove the XP line or keep it hidden
 document.getElementById("xp").style.display = "none";
              // Format total up/down
@@ -214,7 +216,8 @@ document.getElementById("xp").style.display = "none";
              const skillLabels = user.skills.map(s => s.type.replace("skill_", "").toUpperCase());
              const skillValues = user.skills.map(s => s.amount);
              renderSkillChart(skillLabels, skillValues);
-             
+             renderAuditPie(passAudits, failAudits);
+
          } catch (error) {
              console.error("❌ Error fetching user profile:", error);
          }
@@ -229,55 +232,114 @@ document.getElementById("xp").style.display = "none";
      });
  
      // Render skill radar chart using ApexCharts
- function renderSkillChart(labels, values) {
-     const options = {
-         chart: {
-             type: 'radar',
-             height: 400,
-             width: "100%",
-             toolbar: { show: false },
-         },
-         series: [{
-             name: 'Skills',
-             data: values
-         }],
-         labels: labels,
-         yaxis: {
-             show: false
-         },
-         plotOptions: {
-             radar: {
-                 size: 123,
-                 polygons: {
-                     strokeColors: '#ccc',
-                     connectorColors: '#ccc',
-                     fill: {
-                         colors: ['#f8f8f8', '#ffffff']
-                     }
-                 }
-             }
-         },
-         colors: ['#AE88FF'],
-         fill: {
-             opacity: 0.4,
-             colors: ['#AE88FF']
-         },
-         markers: {
-             size: 5,
-             colors: ['#AE88FF'],
-             strokeWidth: 2,
-             strokeColors: '#fff'
-         },
-         stroke: {
-             width: 2
-         }
-     };
- 
-     const chartContainer = document.querySelector("#skillChart");
-     chartContainer.innerHTML = ""; // clear existing
-     const chart = new ApexCharts(chartContainer, options);
-     chart.render();
- }
+     function renderSkillChart(labels, values) {
+        const svg = document.getElementById("skillSVG");
+        svg.innerHTML = "";
+    
+        const barHeight = 25;
+        const gap = 10;
+        const maxVal = Math.max(...values, 1); // prevent divide by 0
+        const chartWidth = svg.clientWidth || 500;
+    
+        svg.setAttribute("height", (barHeight + gap) * labels.length);
+    
+        labels.forEach((label, i) => {
+            const val = values[i];
+            const barWidth = (val / maxVal) * (chartWidth - 150); // space for labels
+    
+            // Label Text
+            const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            labelText.setAttribute("x", 0);
+            labelText.setAttribute("y", i * (barHeight + gap) + barHeight - 5);
+            labelText.setAttribute("font-size", "14");
+            labelText.setAttribute("fill", "#2c3e50");
+            labelText.textContent = label;
+            svg.appendChild(labelText);
+    
+            // Bar Rect
+            const bar = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            bar.setAttribute("x", 100);
+            bar.setAttribute("y", i * (barHeight + gap));
+            bar.setAttribute("width", barWidth);
+            bar.setAttribute("height", barHeight);
+            bar.setAttribute("fill", "#3498db");
+            svg.appendChild(bar);
+    
+            // Value Text
+            const valueText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            valueText.setAttribute("x", 105 + barWidth);
+            valueText.setAttribute("y", i * (barHeight + gap) + barHeight - 5);
+            valueText.setAttribute("font-size", "14");
+            valueText.setAttribute("fill", "#2c3e50");
+            valueText.textContent = val;
+            svg.appendChild(valueText);
+        });
+    }
+    function renderAuditPie(passCount, failCount) {
+        const svg = document.getElementById("auditPieSVG");
+        svg.innerHTML = "";
+    
+        const total = passCount + failCount;
+        if (total === 0) return;
+    
+        const centerX = 100, centerY = 100, radius = 90;
+        const passRatio = passCount / total;
+        const failRatio = failCount / total;
+    
+        if (passRatio === 1) {
+            const fullCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            fullCircle.setAttribute("cx", centerX);
+            fullCircle.setAttribute("cy", centerY);
+            fullCircle.setAttribute("r", radius);
+            fullCircle.setAttribute("fill", "#2ecc71"); // full green
+            svg.appendChild(fullCircle);
+            return;
+        }
+    
+        if (failRatio === 1) {
+            const fullCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            fullCircle.setAttribute("cx", centerX);
+            fullCircle.setAttribute("cy", centerY);
+            fullCircle.setAttribute("r", radius);
+            fullCircle.setAttribute("fill", "#e74c3c"); // full red
+            svg.appendChild(fullCircle);
+            return;
+        }
+    
+        const polarToCartesian = (cx, cy, r, angleDeg) => {
+            const rad = (angleDeg - 90) * (Math.PI / 180);
+            return {
+                x: cx + r * Math.cos(rad),
+                y: cy + r * Math.sin(rad)
+            };
+        };
+    
+        const describeArc = (cx, cy, r, startAngle, endAngle) => {
+            const start = polarToCartesian(cx, cy, r, endAngle);
+            const end = polarToCartesian(cx, cy, r, startAngle);
+            const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+    
+            return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
+        };
+    
+        const passAngle = passRatio * 360;
+        const failAngle = 360 - passAngle;
+    
+        const passPath = describeArc(centerX, centerY, radius, 0, passAngle);
+        const failPath = describeArc(centerX, centerY, radius, passAngle, 360);
+    
+        const passSlice = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        passSlice.setAttribute("d", passPath);
+        passSlice.setAttribute("fill", "#2ecc71");
+        svg.appendChild(passSlice);
+    
+        const failSlice = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        failSlice.setAttribute("d", failPath);
+        failSlice.setAttribute("fill", "#e74c3c");
+        svg.appendChild(failSlice);
+    }
+    
+    
  
  
  });
