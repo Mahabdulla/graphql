@@ -201,8 +201,7 @@ const maxAudit = Math.max(user.totalUp, user.totalDown) || 1;
 const upWidth = (user.totalUp / maxAudit) * 100;
 const downWidth = (user.totalDown / maxAudit) * 100;
 
-document.getElementById("auditUpBar").style.width = `${upWidth}%`;
-document.getElementById("auditDownBar").style.width = `${downWidth}%`;
+renderAuditBars(user.totalUp, user.totalDown);
 
 // Comment
 let comment = "Needs improvement";
@@ -338,7 +337,64 @@ document.getElementById("auditComment").textContent = comment;
        failSlice.setAttribute("fill", "#e74c3c");
        svg.appendChild(failSlice);
    }
-   
+   // Function to render audit bars using SVG
+function renderAuditBars(upValue, downValue) {
+    // Get max value for scaling
+    const maxValue = Math.max(upValue, downValue) || 1; // prevent division by zero
+    
+    // Calculate percentages
+    const upWidth = (upValue / maxValue) * 100;
+    const downWidth = (downValue / maxValue) * 100;
+    
+    // Render "Done" bar (upValue)
+    const upSvg = document.getElementById("auditUpSVG");
+    upSvg.innerHTML = ""; // Clear previous content
+    
+    const upRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    upRect.setAttribute("x", "0");
+    upRect.setAttribute("y", "0");
+    upRect.setAttribute("width", upWidth + "%");
+    upRect.setAttribute("height", "14");
+    upRect.setAttribute("rx", "7"); // Rounded corners (radius)
+    upRect.setAttribute("ry", "7"); // Rounded corners (radius)
+    upRect.setAttribute("fill", "#27ae60"); // Green color
+    upSvg.appendChild(upRect);
+    
+    // Render "Received" bar (downValue)
+    const downSvg = document.getElementById("auditDownSVG");
+    downSvg.innerHTML = ""; // Clear previous content
+    
+    const downRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    downRect.setAttribute("x", "0");
+    downRect.setAttribute("y", "0");
+    downRect.setAttribute("width", downWidth + "%");
+    downRect.setAttribute("height", "14");
+    downRect.setAttribute("rx", "7"); // Rounded corners (radius)
+    downRect.setAttribute("ry", "7"); // Rounded corners (radius)
+    downRect.setAttribute("fill", "#000000"); // Black color
+    downSvg.appendChild(downRect);
+    
+    // Add background for better visibility of partial bars
+    const upBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    upBg.setAttribute("x", "0");
+    upBg.setAttribute("y", "0");
+    upBg.setAttribute("width", "100%");
+    upBg.setAttribute("height", "14");
+    upBg.setAttribute("rx", "7");
+    upBg.setAttribute("ry", "7");
+    upBg.setAttribute("fill", "#e0e0e0");
+    upSvg.insertBefore(upBg, upRect);
+    
+    const downBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    downBg.setAttribute("x", "0");
+    downBg.setAttribute("y", "0");
+    downBg.setAttribute("width", "100%");
+    downBg.setAttribute("height", "14");
+    downBg.setAttribute("rx", "7");
+    downBg.setAttribute("ry", "7");
+    downBg.setAttribute("fill", "#e0e0e0");
+    downSvg.insertBefore(downBg, downRect);
+}
    
 
 

@@ -43,14 +43,10 @@
         <div class="audit-box">
             <h3>Audit Ratio</h3>
             <p>Done: <span id="auditUp">--</span> ↑</p>
-            <div class="bar-container">
-                <div class="bar-fill green" id="auditUpBar"></div>
-            </div>
+            <svg id="auditUpSVG" width="100%" height="14" class="audit-bar-svg"></svg>
         
             <p>Received: <span id="auditDown">--</span> ↓</p>
-            <div class="bar-container">
-                <div class="bar-fill black" id="auditDownBar"></div>
-            </div>
+            <svg id="auditDownSVG" width="100%" height="14" class="audit-bar-svg"></svg>
         
             <h2 id="auditRatio" class="audit-score">--</h2>
             <p id="auditComment" class="audit-comment">Loading...</p>
