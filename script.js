@@ -338,7 +338,26 @@ document.getElementById("auditComment").textContent = comment;
        svg.appendChild(failSlice);
    }
    // Function to render audit bars using SVG
+// Replace the existing renderAuditBars function with this
 function renderAuditBars(upValue, downValue) {
+    // Get the container where we'll place our single SVG
+    const container = document.getElementById("auditRatioContainer");
+    if (!container) return;
+    
+    // Clear previous content
+    container.innerHTML = "";
+    
+    // Calculate ratio and determine comment
+    const ratio = upValue && downValue ? (upValue / downValue).toFixed(2) : "0.00";
+    let comment = "Needs improvement";
+    if (ratio >= 1) comment = "Almost perfect!";
+    if (ratio >= 1.5) comment = "Great auditor!";
+    if (ratio >= 2) comment = "Audit master!";
+    
+    // Format values in MB
+    const doneMB = (upValue / 1_000_000).toFixed(2);
+    const receivedMB = (downValue / 1_000_000).toFixed(2);
+    
     // Get max value for scaling
     const maxValue = Math.max(upValue, downValue) || 1; // prevent division by zero
     
@@ -346,56 +365,134 @@ function renderAuditBars(upValue, downValue) {
     const upWidth = (upValue / maxValue) * 100;
     const downWidth = (downValue / maxValue) * 100;
     
-    // Render "Done" bar (upValue)
-    const upSvg = document.getElementById("auditUpSVG");
-    upSvg.innerHTML = ""; // Clear previous content
+    // Create SVG element
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "200");
+    svg.setAttribute("viewBox", "0 0 400 200");
     
-    const upRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    upRect.setAttribute("x", "0");
-    upRect.setAttribute("y", "0");
-    upRect.setAttribute("width", upWidth + "%");
-    upRect.setAttribute("height", "14");
-    upRect.setAttribute("rx", "7"); // Rounded corners (radius)
-    upRect.setAttribute("ry", "7"); // Rounded corners (radius)
-    upRect.setAttribute("fill", "#27ae60"); // Green color
-    upSvg.appendChild(upRect);
+    // Add header text
+    const headerText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    headerText.setAttribute("x", "0");
+    headerText.setAttribute("y", "20");
+    headerText.setAttribute("font-size", "18");
+    headerText.setAttribute("font-weight", "bold");
+    headerText.setAttribute("fill", "#2c3e50");
+    headerText.textContent = "Audit Ratio";
+    svg.appendChild(headerText);
     
-    // Render "Received" bar (downValue)
-    const downSvg = document.getElementById("auditDownSVG");
-    downSvg.innerHTML = ""; // Clear previous content
+    // Add ratio value
+    const ratioText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    ratioText.setAttribute("x", "380");
+    ratioText.setAttribute("y", "20");
+    ratioText.setAttribute("font-size", "18");
+    ratioText.setAttribute("font-weight", "bold");
+    ratioText.setAttribute("text-anchor", "end");
+    ratioText.setAttribute("fill", "#2c3e50");
+    ratioText.textContent = ratio;
+    svg.appendChild(ratioText);
     
-    const downRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    downRect.setAttribute("x", "0");
-    downRect.setAttribute("y", "0");
-    downRect.setAttribute("width", downWidth + "%");
-    downRect.setAttribute("height", "14");
-    downRect.setAttribute("rx", "7"); // Rounded corners (radius)
-    downRect.setAttribute("ry", "7"); // Rounded corners (radius)
-    downRect.setAttribute("fill", "#000000"); // Black color
-    downSvg.appendChild(downRect);
+    // Add "Done" label
+    const doneLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    doneLabel.setAttribute("x", "0");
+    doneLabel.setAttribute("y", "50");
+    doneLabel.setAttribute("font-size", "14");
+    doneLabel.setAttribute("fill", "#34495e");
+    doneLabel.textContent = "Done:";
+    svg.appendChild(doneLabel);
     
-    // Add background for better visibility of partial bars
-    const upBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    upBg.setAttribute("x", "0");
-    upBg.setAttribute("y", "0");
-    upBg.setAttribute("width", "100%");
-    upBg.setAttribute("height", "14");
-    upBg.setAttribute("rx", "7");
-    upBg.setAttribute("ry", "7");
-    upBg.setAttribute("fill", "#e0e0e0");
-    upSvg.insertBefore(upBg, upRect);
+    // Add Done value
+    const doneValue = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    doneValue.setAttribute("x", "380");
+    doneValue.setAttribute("y", "50");
+    doneValue.setAttribute("font-size", "14");
+    doneValue.setAttribute("text-anchor", "end");
+    doneValue.setAttribute("fill", "#34495e");
+    doneValue.textContent = `${doneMB} MB`;
+    svg.appendChild(doneValue);
     
-    const downBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    downBg.setAttribute("x", "0");
-    downBg.setAttribute("y", "0");
-    downBg.setAttribute("width", "100%");
-    downBg.setAttribute("height", "14");
-    downBg.setAttribute("rx", "7");
-    downBg.setAttribute("ry", "7");
-    downBg.setAttribute("fill", "#e0e0e0");
-    downSvg.insertBefore(downBg, downRect);
+    // Add Done bar background
+    const upBarBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    upBarBg.setAttribute("x", "0");
+    upBarBg.setAttribute("y", "60");
+    upBarBg.setAttribute("width", "380");
+    upBarBg.setAttribute("height", "14");
+    upBarBg.setAttribute("rx", "7");
+    upBarBg.setAttribute("ry", "7");
+    upBarBg.setAttribute("fill", "#e0e0e0");
+    svg.appendChild(upBarBg);
+    
+    // Add Done bar fill
+    const upBar = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    upBar.setAttribute("x", "0");
+    upBar.setAttribute("y", "60");
+    upBar.setAttribute("width", (upWidth * 380 / 100).toString());
+    upBar.setAttribute("height", "14");
+    upBar.setAttribute("rx", "7");
+    upBar.setAttribute("ry", "7");
+    upBar.setAttribute("fill", "#27ae60");
+    svg.appendChild(upBar);
+    
+    // Add "Received" label
+    const receivedLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    receivedLabel.setAttribute("x", "0");
+    receivedLabel.setAttribute("y", "100");
+    receivedLabel.setAttribute("font-size", "14");
+    receivedLabel.setAttribute("fill", "#34495e");
+    receivedLabel.textContent = "Received:";
+    svg.appendChild(receivedLabel);
+    
+    // Add Received value
+    const receivedValue = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    receivedValue.setAttribute("x", "380");
+    receivedValue.setAttribute("y", "100");
+    receivedValue.setAttribute("font-size", "14");
+    receivedValue.setAttribute("text-anchor", "end");
+    receivedValue.setAttribute("fill", "#34495e");
+    receivedValue.textContent = `${receivedMB} MB`;
+    svg.appendChild(receivedValue);
+    
+    // Add Received bar background
+    const downBarBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    downBarBg.setAttribute("x", "0");
+    downBarBg.setAttribute("y", "110");
+    downBarBg.setAttribute("width", "380");
+    downBarBg.setAttribute("height", "14");
+    downBarBg.setAttribute("rx", "7");
+    downBarBg.setAttribute("ry", "7");
+    downBarBg.setAttribute("fill", "#e0e0e0");
+    svg.appendChild(downBarBg);
+    
+    // Add Received bar fill
+    const downBar = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    downBar.setAttribute("x", "0");
+    downBar.setAttribute("y", "110");
+    downBar.setAttribute("width", (downWidth * 380 / 100).toString());
+    downBar.setAttribute("height", "14");
+    downBar.setAttribute("rx", "7");
+    downBar.setAttribute("ry", "7");
+    downBar.setAttribute("fill", "#000000");
+    svg.appendChild(downBar);
+    
+    // Add comment
+    const commentText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    commentText.setAttribute("x", "200");
+    commentText.setAttribute("y", "160");
+    commentText.setAttribute("font-size", "16");
+    commentText.setAttribute("text-anchor", "middle");
+    commentText.setAttribute("fill", "#f39c12");
+    commentText.textContent = comment;
+    svg.appendChild(commentText);
+    
+    // Add the SVG to the container
+    container.appendChild(svg);
+    
+    // Update the text elements (for browsers that might not support SVG text well)
+    document.getElementById("auditRatio").textContent = ratio;
+    document.getElementById("auditUp").textContent = `${doneMB} MB`;
+    document.getElementById("auditDown").textContent = `${receivedMB} MB`;
+    document.getElementById("auditComment").textContent = comment;
 }
-   
 
 
 });

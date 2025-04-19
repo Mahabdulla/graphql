@@ -41,15 +41,18 @@
         <p>Email: <span id="useremail"></span></p>        
         <p><span id="xp"></span></p>
         <div class="audit-box">
-            <h3>Audit Ratio</h3>
-            <p>Done: <span id="auditUp">--</span> ↑</p>
-            <svg id="auditUpSVG" width="100%" height="14" class="audit-bar-svg"></svg>
-        
-            <p>Received: <span id="auditDown">--</span> ↓</p>
-            <svg id="auditDownSVG" width="100%" height="14" class="audit-bar-svg"></svg>
-        
-            <h2 id="auditRatio" class="audit-score">--</h2>
-            <p id="auditComment" class="audit-comment">Loading...</p>
+            
+            <div id="auditRatioContainer">
+                <!-- The SVG will be inserted here by JavaScript -->
+            </div>
+            
+            <!-- Fallback text elements (hidden if SVG renders correctly) -->
+            <div style="display: none;">
+                <p>Audit Ratio: <span id="auditRatio">0.00</span></p>
+                <p>Done: <span id="auditUp">0.00 MB</span></p>
+                <p>Received: <span id="auditDown">0.00 MB</span></p>
+                <p class="audit-comment" id="auditComment">Needs improvement</p>
+            </div>
         </div>
         
        
