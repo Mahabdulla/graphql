@@ -240,7 +240,7 @@ document.getElementById("auditComment").textContent = comment;
        const maxVal = Math.max(...values, 1); // prevent divide by 0
        const chartWidth = svg.clientWidth || 500;
    
-       svg.setAttribute("height", (barHeight + gap) * labels.length);
+       svg.setAttribute("height", (barHeight + gap) * labels.length + 20);
    
        labels.forEach((label, i) => {
            const val = values[i];
